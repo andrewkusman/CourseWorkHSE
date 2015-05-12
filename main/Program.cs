@@ -150,7 +150,6 @@ namespace main
             }
         }
     }
-
     class ReSender
     {
         private static string SplitStr(string text) //Функция, возвращающая текст, заключенный в " "
@@ -314,8 +313,8 @@ namespace main
 
         static void Main(string[] args)
         {
-            int appid = 4875368;
-            string email = "89998132952";
+            int appid = 4915376;
+            string email = "89263014118";
             string password = "**********";
             Settings mess = Settings.Messages;
             Settings friends = Settings.Friends;
