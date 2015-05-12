@@ -275,7 +275,7 @@ namespace main
         Exit:
             Console.ReadKey();
 
-            //the end^_^
+            //the end
 
         }
     }
