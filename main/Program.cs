@@ -50,17 +50,28 @@ namespace main
             _horoscopes.Add("водолей", "http://astroscope.ru/horoskop/ejednevniy_goroskop/aquarius.html");
             _horoscopes.Add("дева", "http://astroscope.ru/horoskop/ejednevniy_goroskop/virgo.html");
             _horoscopes.Add("рыба", "http://astroscope.ru/horoskop/ejednevniy_goroskop/pisces.html");
-            if (incStr.Split(' ').Contains("Завтра") || (incStr.Split(' ').Contains("завтра")))
+            string tmp = null;
+            foreach (var i in incStr.Split(' '))
             {
-                return
-                    _horoscopes[incStr.Split(' ')[1].ToLower()].Substring(0,
-                        _horoscopes[incStr.Split(' ')[1].ToLower()].Length - 5) + "_zavtra.html";
+                try
+                {
+                    if (incStr.Split(' ').Contains("Завтра") || (incStr.Split(' ').Contains("завтра")))
+                    {
+                        tmp =
+                            _horoscopes[i.ToLower()].Substring(0,
+                                _horoscopes[i.ToLower()].Length - 5) + "_zavtra.html";
+                    }
+                    else
+                    {
+                        tmp = _horoscopes[incStr.Split(' ')[1].ToLower()];
+                    }
+                }
+                catch
+                {
+                    continue;
+                }
             }
-            else
-            {
-                return _horoscopes[incStr.Split(' ')[1].ToLower()];
-            }
-
+            return tmp;
         }
         private static string GetHoroscope(string incStr)
         {
@@ -226,13 +237,13 @@ namespace main
             ReadOnlyCollection<Message> testMessage = _vk.Messages.Get(MessageType.Received, out count);
             foreach (Message i in testMessage)
             {
-                if (i.Body.Contains("Переслать") && !Convert.ToBoolean(i.ReadState))
+                if (i.Body.ToLower().Contains("переслать") && !Convert.ToBoolean(i.ReadState))
                 {
                     Task.ReSendMessage(i, _vk);
                     Console.WriteLine(">> Message was ReSend");
                     _vk.Messages.MarkAsRead(Convert.ToInt64(i.Id));
                 }
-                else if (i.Body.Contains("Гороскоп") && !Convert.ToBoolean(i.ReadState))
+                else if (i.Body.ToLower().Contains("гороскоп") && !Convert.ToBoolean(i.ReadState))
                 {
                     Horoscope.SendHoroscope(i, _vk);
                     Console.WriteLine(">> Horoscope was Send");
@@ -245,7 +256,7 @@ namespace main
         {
             int appid = 4875368;
             string email = "89998132952";
-            string password = "T511baa927nkk365fmt315z";
+            string password = "T511baa927nk";
             Settings mess = Settings.Messages;
             Settings friends = Settings.Friends;
 
