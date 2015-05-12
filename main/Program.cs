@@ -37,19 +37,21 @@ namespace main
         private static string GetHorolink(string incStr)
         {
 
-            Dictionary<string, string> _horoscopes = new Dictionary<string, string>();
-            _horoscopes.Add("овен", "http://astroscope.ru/horoskop/ejednevniy_goroskop/aries.html");
-            _horoscopes.Add("весы", "http://astroscope.ru/horoskop/ejednevniy_goroskop/libra.html");
-            _horoscopes.Add("телец", "http://astroscope.ru/horoskop/ejednevniy_goroskop/taurus.html");
-            _horoscopes.Add("скорпион", "http://astroscope.ru/horoskop/ejednevniy_goroskop/scorpio.html");
-            _horoscopes.Add("близнецы", "http://astroscope.ru/horoskop/ejednevniy_goroskop/gemini.html");
-            _horoscopes.Add("стрелец", "http://astroscope.ru/horoskop/ejednevniy_goroskop/sagittarius.html");
-            _horoscopes.Add("рак", "http://astroscope.ru/horoskop/ejednevniy_goroskop/cancer.html");
-            _horoscopes.Add("козерог", "http://astroscope.ru/horoskop/ejednevniy_goroskop/capricorn.html");
-            _horoscopes.Add("лев", "http://astroscope.ru/horoskop/ejednevniy_goroskop/leo.html");
-            _horoscopes.Add("водолей", "http://astroscope.ru/horoskop/ejednevniy_goroskop/aquarius.html");
-            _horoscopes.Add("дева", "http://astroscope.ru/horoskop/ejednevniy_goroskop/virgo.html");
-            _horoscopes.Add("рыба", "http://astroscope.ru/horoskop/ejednevniy_goroskop/pisces.html");
+            Dictionary<string, string> _horoscopes = new Dictionary<string, string>
+            {
+                {"овен", "http://astroscope.ru/horoskop/ejednevniy_goroskop/aries.html"},
+                {"весы", "http://astroscope.ru/horoskop/ejednevniy_goroskop/libra.html"},
+                {"телец", "http://astroscope.ru/horoskop/ejednevniy_goroskop/taurus.html"},
+                {"скорпион", "http://astroscope.ru/horoskop/ejednevniy_goroskop/scorpio.html"},
+                {"близнецы", "http://astroscope.ru/horoskop/ejednevniy_goroskop/gemini.html"},
+                {"стрелец", "http://astroscope.ru/horoskop/ejednevniy_goroskop/sagittarius.html"},
+                {"рак", "http://astroscope.ru/horoskop/ejednevniy_goroskop/cancer.html"},
+                {"козерог", "http://astroscope.ru/horoskop/ejednevniy_goroskop/capricorn.html"},
+                {"лев", "http://astroscope.ru/horoskop/ejednevniy_goroskop/leo.html"},
+                {"водолей", "http://astroscope.ru/horoskop/ejednevniy_goroskop/aquarius.html"},
+                {"дева", "http://astroscope.ru/horoskop/ejednevniy_goroskop/virgo.html"},
+                {"рыба", "http://astroscope.ru/horoskop/ejednevniy_goroskop/pisces.html"}
+            };
             string tmp = null;
             foreach (var i in incStr.Split(' '))
             {
@@ -78,19 +80,27 @@ namespace main
             string horoscope = "No Horoscope";
             string pattern = "(<div class=\"goroskop\">(.+)</div>)";
             string horoLink = GetHorolink(incStr);
-            var req =
-                            (HttpWebRequest)
-                                WebRequest.Create(horoLink);
-            var resp = (HttpWebResponse)req.GetResponse();
-            var sr = new StreamReader(resp.GetResponseStream(), Encoding.GetEncoding(1251));
-            string content = sr.ReadToEnd();
-            sr.Close();
-            MatchCollection matches = Regex.Matches(content, pattern);
-            foreach (Match match in matches.Cast<Match>().Where(match => matches.Count != 0))
+            if (horoLink == null)
             {
-                horoscope = match.Groups[2].Value;
+                horoscope = null;
+                return horoscope;
             }
-            return horoscope;
+            else
+            {
+                var req =
+                    (HttpWebRequest)
+                        WebRequest.Create(horoLink);
+                var resp = (HttpWebResponse) req.GetResponse();
+                var sr = new StreamReader(resp.GetResponseStream(), Encoding.GetEncoding(1251));
+                string content = sr.ReadToEnd();
+                sr.Close();
+                MatchCollection matches = Regex.Matches(content, pattern);
+                foreach (Match match in matches.Cast<Match>().Where(match => matches.Count != 0))
+                {
+                    horoscope = match.Groups[2].Value;
+                }
+                return horoscope;
+            }
         }
 
         public static void SendHoroscope(Message incStr, VkApi _vk)
@@ -101,44 +111,74 @@ namespace main
             string captcha = randomNumber.ToString();
             string text = GetHoroscope(incStr.Body);
             var i = Convert.ToInt64(incStr.UserId);
-            _vk.Messages.Send(
-               i,
-               false,
-               "This message was send by Bot. \n\rTime of sending: " +
-               DateTime.Now.ToString("HH:mm:ss \n\r") +
-               "Message Id: " + randomNumber + "\n\r" + "Text of message: \n\rYour horoscope for today is: " + text,
-               "",
-               null,
-               null,
-               false,
-               null,
-               null,
-               captcha
-            );
-            Console.WriteLine(">> Id sent to: " + i);
+            if (text == null)
+            {
+                _vk.Messages.Send(
+                    i,
+                    false,
+                    "This message was send by Bot. \n\rTime of sending: " +
+                    DateTime.Now.ToString("HH:mm:ss \n\r") +
+                    "Message Id: " + randomNumber + "\n\r" +
+                    "Text of message: \n\rI think you have made a mistake in message, please try again.",
+                    "",
+                    null,
+                    null,
+                    false,
+                    null,
+                    null,
+                    captcha
+                    );
+                Console.WriteLine(">> Message sent back cuz of mistake in it " + i);
+            }
+            else
+            {
+                _vk.Messages.Send(
+                    i,
+                    false,
+                    "This message was send by Bot. \n\rTime of sending: " +
+                    DateTime.Now.ToString("HH:mm:ss \n\r") +
+                    "Message Id: " + randomNumber + "\n\r" + "Text of message: \n\rYour horoscope for today is: " + text,
+                    "",
+                    null,
+                    null,
+                    false,
+                    null,
+                    null,
+                    captcha
+                    );
+                Console.WriteLine(">> Id sent to: " + i);
+            }
         }
     }
 
-    class Task
+    class ReSender
     {
         private static string SplitStr(string text) //Функция, возвращающая текст, заключенный в " "
         {                                           //из исходного сообщения
-            bool flag = false;
-            string result = null;
-            int tmp1 = 0;
-            int tmp2 = 0;
-            for (int i = 1; i < text.Length; i++)
+            try
             {
-                if (text[i - 1] != '\"' || i < 1) continue;
-                if (!flag)
+                text += " ";
+                bool flag = false;
+                string result = null;
+                int tmp1 = 0;
+                int tmp2 = 0;
+                for (int i = 1; i < text.Length; i++)
                 {
-                    tmp1 = i;
-                    flag = true;
+                    if (text[i - 1] != '\"' || i < 1) continue;
+                    else if (!flag)
+                    {
+                        tmp1 = i;
+                        flag = true;
+                    }
+                    else tmp2 = i - 1;
                 }
-                else tmp2 = i - 1;
+                result = text.Substring(tmp1, tmp2 - tmp1);
+                return result;
             }
-            result = text.Substring(tmp1, tmp2 - tmp1);
-            return result;
+            catch
+            {
+                return null;
+            }
         }
 
         private static List<long> GetReciepentIdList(string text) //Функция, возвращающая лист айди пользователей
@@ -191,21 +231,41 @@ namespace main
                 foreach (var i in GetReciepentIdList(messageText.Body))
                 {
                     string text = SplitStr(messageText.Body);
-                    _vk.Messages.Send(
-                        i,
-                        false,
-                        "This message was send by ANONIMUS. \n\rTime of sending: " +
-                        DateTime.Now.ToString("HH:mm:ss \n\r") +
-                        "Message Id: " + randomNumber + "\n\r" + "Text of message: " + text,
-                        "",
-                        null,
-                        null,
-                        false,
-                        null,
-                        null,
-                        captcha
-                        );
-                    Console.WriteLine(">> Id sent to: " + i);
+                    if (text == null || text == " " || text == "")
+                    {
+                        _vk.Messages.Send(
+                            Convert.ToInt64(messageText.UserId),
+                            false,
+                            "There was a mistake in your message, please put your text into the \" \" and use full " +
+                            "link, like: https://vk.com/1",
+                            "",
+                            null,
+                            null,
+                            false,
+                            null,
+                            null,
+                            captcha
+                            );
+                        Console.WriteLine(">> Message was ReSend Back " + i);
+                    }
+                    else
+                    {
+                        _vk.Messages.Send(
+                            i,
+                            false,
+                            "This message was send by ANONIMUS. \n\rTime of sending: " +
+                            DateTime.Now.ToString("HH:mm:ss \n\r") +
+                            "Message Id: " + randomNumber + "\n\r" + "Text of message: " + text,
+                            "",
+                            null,
+                            null,
+                            false,
+                            null,
+                            null,
+                            captcha
+                            );
+                        Console.WriteLine(">> Id sent to: " + i);
+                    }
                 }
             }
             else if (GetReciepentIdList(messageText.Body).Count <= 10 || GetReciepentIdList(messageText.Body).Count <= 0)
@@ -239,7 +299,7 @@ namespace main
             {
                 if (i.Body.ToLower().Contains("переслать") && !Convert.ToBoolean(i.ReadState))
                 {
-                    Task.ReSendMessage(i, _vk);
+                    ReSender.ReSendMessage(i, _vk);
                     Console.WriteLine(">> Message was ReSend");
                     _vk.Messages.MarkAsRead(Convert.ToInt64(i.Id));
                 }
@@ -256,7 +316,7 @@ namespace main
         {
             int appid = 4875368;
             string email = "89998132952";
-            string password = "T511baa927nk";
+            string password = "**********";
             Settings mess = Settings.Messages;
             Settings friends = Settings.Friends;
 
@@ -282,7 +342,6 @@ namespace main
         Exit:
             Console.ReadKey();
 
-            //the end
 
         }
     }
