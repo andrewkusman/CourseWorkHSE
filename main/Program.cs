@@ -20,6 +20,17 @@ using Encoding = System.Text.Encoding;
 
 namespace main
 {
+    class Person
+    {
+        public long Id;
+        public string first_name;
+        public string last_name;
+        public int hidden;
+    }
+    class Response
+    {
+        public Person response;
+    }
     class Horoscope
     {
 
@@ -96,17 +107,7 @@ namespace main
             Console.WriteLine(">> Id sent to: " + i);
         }
     }
-    class Person
-    {
-        public long Id;
-        public string first_name;
-        public string last_name;
-        public int hidden;
-    }
-    class Response
-    {
-        public Person response;
-    }
+
     class Task
     {
         private static string SplitStr(string text) //Функция, возвращающая текст, заключенный в " "
@@ -218,9 +219,6 @@ namespace main
     {
         private static Timer _timer;
         private static VkApi _vk;
-
-
-
         private static void OnTimedEvent(object source, ElapsedEventArgs e)
         {
             Console.WriteLine(">> Time: " + DateTime.Now.ToString("HH:mm:ss"));
@@ -242,8 +240,6 @@ namespace main
                 }
             }
         }
-
-
 
         static void Main(string[] args)
         {
