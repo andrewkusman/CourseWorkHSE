@@ -310,6 +310,7 @@ namespace main
             foreach (long i in friendRequestsId)
             {
                 _vk.Friends.Add(i);
+                Help.HelpSend(_vk, i);
                 Console.WriteLine(">> Added id: " + i);
             }
         }
@@ -352,7 +353,7 @@ namespace main
         private static void OnTimedEvent(object source, ElapsedEventArgs e)
         {
             //Console.WriteLine(">> Time: " + DateTime.Now.ToString("HH:mm:ss"));
-            int count = 0;
+            int count = 100;
             ReadOnlyCollection<Message> testMessage = _vk.Messages.Get(MessageType.Received, out count);
             Random random = new Random();
             int randomNumber = random.Next(1000, 1000000);
@@ -394,6 +395,7 @@ namespace main
                        null,
                        captcha
                    );
+                    Console.WriteLine(">> Unknow message has been handled");
                     _vk.Messages.MarkAsRead(Convert.ToInt64(i.Id));
                 }
             }
