@@ -4,19 +4,14 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Net.Mime;
-using System.Timers;
 using System.Text;
 using System.Text.RegularExpressions;
-using FluentNUnit;
+using System.Timers;
 using Newtonsoft.Json;
-using RazorEngine;
 using VkNet;
 using VkNet.Enums;
 using VkNet.Enums.Filters;
 using VkNet.Model;
-using Encoding = System.Text.Encoding;
-
 
 namespace main
 {
@@ -65,7 +60,7 @@ namespace main
                     }
                     else
                     {
-                        tmp = _horoscopes[incStr.Split(' ')[1].ToLower()];
+                        tmp = _horoscopes[i.ToLower()];
                     }
                 }
                 catch
@@ -285,6 +280,31 @@ namespace main
 
         }
     }
+
+    class Help
+    {
+        private static string text = "Бот для ВК. v.0.0.1 \n\r" +
+                              "Доступные функции: \n\r" +
+                              "1)Гороскоп на сегодня или на завтра. Напишите: Гороскоп на сегодня/завтра \"знак зодиака\"\n\r" +
+                              "2)Переслать текст сообщения от имени бота. Напишите: Переслать \"текст сообщения в кавычках(Смайлики пока что не поддержиапются)\" и ссылку/cсылки на страницы получателей(не больше 10 за 1 раз)\n\r";
+
+        public static void HelpSend(VkApi _vk, long id)
+        {
+            _vk.Messages.Send(
+                            id,
+                            false,
+                            text,
+                            "",
+                            null,
+                            null,
+                            false,
+                            null,
+                            null,
+                            "123123"
+                            );
+            Console.WriteLine(">> Help was send" + id);
+        }
+    }
     class Program
     {
         private static Timer _timer;
@@ -306,6 +326,28 @@ namespace main
                 {
                     Horoscope.SendHoroscope(i, _vk);
                     Console.WriteLine(">> Horoscope was Send");
+                    _vk.Messages.MarkAsRead(Convert.ToInt64(i.Id));
+                }
+                else if (i.Body.ToLower().Contains("помощь") && !i.Body.ToLower().Contains("переслать") && !Convert.ToBoolean(i.ReadState))
+                {
+                    Help.HelpSend(_vk, Convert.ToInt64(i.UserId));
+                    Console.WriteLine(">> Help was Send");
+                    _vk.Messages.MarkAsRead(Convert.ToInt64(i.Id));
+                }
+                else if(!Convert.ToBoolean(i.ReadState))
+                {
+                    _vk.Messages.Send(
+                       Convert.ToInt64(i.UserId),
+                       false,
+                       "Type \"Помощь\" to get information about Bot",
+                       "",
+                       null,
+                       null,
+                       false,
+                       null,
+                       null,
+                       "123"
+                   );
                     _vk.Messages.MarkAsRead(Convert.ToInt64(i.Id));
                 }
             }
@@ -334,7 +376,7 @@ namespace main
                 goto Exit;
             }
 
-            _timer = new Timer(500);
+            _timer = new Timer(2500);
             _timer.Start();
             _timer.Elapsed += new ElapsedEventHandler(OnTimedEvent);
 
