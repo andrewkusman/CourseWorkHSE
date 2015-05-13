@@ -315,7 +315,7 @@ namespace main
         {
             int appid = 4915376;
             string email = "89263014118";
-            string password = "**********";
+            string password = Console.ReadLine();
             Settings mess = Settings.Messages;
             Settings friends = Settings.Friends;
 
@@ -334,7 +334,7 @@ namespace main
                 goto Exit;
             }
 
-            _timer = new Timer(5000);
+            _timer = new Timer(500);
             _timer.Start();
             _timer.Elapsed += new ElapsedEventHandler(OnTimedEvent);
 
