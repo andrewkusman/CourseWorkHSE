@@ -11,6 +11,7 @@ using Newtonsoft.Json;
 using VkNet;
 using VkNet.Enums;
 using VkNet.Enums.Filters;
+using VkNet.Exception;
 using VkNet.Model;
 
 namespace main
@@ -28,11 +29,11 @@ namespace main
     }
     class Horoscope
     {
-
-        private static string GetHorolink(string incStr)
+        private static string date = null;
+        private static string GetHorolink(string incStr, out string horo)
         {
 
-            Dictionary<string, string> _horoscopes = new Dictionary<string, string>
+            Dictionary<string, string> horoscopes = new Dictionary<string, string>
             {
                 {"овен", "http://astroscope.ru/horoskop/ejednevniy_goroskop/aries.html"},
                 {"весы", "http://astroscope.ru/horoskop/ejednevniy_goroskop/libra.html"},
@@ -48,6 +49,7 @@ namespace main
                 {"рыба", "http://astroscope.ru/horoskop/ejednevniy_goroskop/pisces.html"}
             };
             string tmp = null;
+            string horoTmp = null;
             foreach (var i in incStr.Split(' '))
             {
                 try
@@ -55,12 +57,16 @@ namespace main
                     if (incStr.Split(' ').Contains("Завтра") || (incStr.Split(' ').Contains("завтра")))
                     {
                         tmp =
-                            _horoscopes[i.ToLower()].Substring(0,
-                                _horoscopes[i.ToLower()].Length - 5) + "_zavtra.html";
+                            horoscopes[i.ToLower()].Substring(0,
+                                horoscopes[i.ToLower()].Length - 5) + "_zavtra.html";
+                        horoTmp = i;
+                        date = "for tomorrow";
                     }
                     else
                     {
-                        tmp = _horoscopes[i.ToLower()];
+                        tmp = horoscopes[i.ToLower()];
+                        horoTmp = i;
+                        date = "for today";
                     }
                 }
                 catch
@@ -68,13 +74,16 @@ namespace main
                     continue;
                 }
             }
+            horo = horoTmp;
             return tmp;
         }
-        private static string GetHoroscope(string incStr)
+        private static string GetHoroscope(string incStr, out string horoName)
         {
             string horoscope = "No Horoscope";
             string pattern = "(<div class=\"goroskop\">(.+)</div>)";
-            string horoLink = GetHorolink(incStr);
+            string horoname = null;
+            string horoLink = GetHorolink(incStr, out horoname);
+            horoName = horoname;
             if (horoLink == null)
             {
                 horoscope = null;
@@ -104,7 +113,8 @@ namespace main
             Random random = new Random();
             int randomNumber = random.Next(1000, 1000000); //рандом для каптчи и для айди сообщений
             string captcha = randomNumber.ToString();
-            string text = GetHoroscope(incStr.Body);
+            string horoName = null;
+            string text = GetHoroscope(incStr.Body, out horoName);
             var i = Convert.ToInt64(incStr.UserId);
             if (text == null)
             {
@@ -132,7 +142,7 @@ namespace main
                     false,
                     "This message was send by Bot. \n\rTime of sending: " +
                     DateTime.Now.ToString("HH:mm:ss \n\r") +
-                    "Message Id: " + randomNumber + "\n\r" + "Text of message: \n\rYour horoscope for today is: " + text,
+                    "Message Id: " + randomNumber + "\n\r" + "Text of message: \n\rYour horoscope for \""+ horoName + "\" " + date +" is: " + text,
                     "",
                     null,
                     null,
@@ -287,7 +297,8 @@ namespace main
                               "Доступные функции: \n\r" +
                               "1)Гороскоп на сегодня или на завтра. Напишите: Гороскоп на сегодня/завтра \"знак зодиака\"\n\r" +
                               "2)Переслать текст сообщения от имени бота. Напишите: Переслать \"текст сообщения в кавычках(Смайлики пока что не поддержиапются)\" и ссылку/cсылки на страницы получателей(не больше 10 за 1 раз)\n\r";
-
+        static Random rand = new Random();
+        static string captcha = rand.Next(10000, 1000000).ToString();
         public static void HelpSend(VkApi _vk, long id)
         {
             _vk.Messages.Send(
@@ -300,7 +311,7 @@ namespace main
                             false,
                             null,
                             null,
-                            "123123"
+                            captcha
                             );
             Console.WriteLine(">> Help was send" + id);
         }
@@ -336,6 +347,8 @@ namespace main
                 }
                 else if(!Convert.ToBoolean(i.ReadState))
                 {
+                    Random rand = new Random();
+                    var captcha = rand.Next(10000, 1000000).ToString();
                     _vk.Messages.Send(
                        Convert.ToInt64(i.UserId),
                        false,
@@ -346,7 +359,7 @@ namespace main
                        false,
                        null,
                        null,
-                       "123"
+                       captcha
                    );
                     _vk.Messages.MarkAsRead(Convert.ToInt64(i.Id));
                 }
@@ -360,16 +373,20 @@ namespace main
             string password = Console.ReadLine();
             Settings mess = Settings.Messages;
             Settings friends = Settings.Friends;
+            
+            
 
-
-
+            
             _vk = new VkApi();
+
+
             try
             {
                 _vk.Authorize(appid, email, password, mess | friends);
+                Console.WriteLine(_vk.AccessToken);
                 Console.WriteLine("Authorization successfull");
             }
-            catch (Exception e)
+            catch (CaptchaNeededException e)
             {
                 Console.WriteLine(e);
                 Console.ReadKey();
