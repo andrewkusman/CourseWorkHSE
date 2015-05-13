@@ -205,7 +205,7 @@ namespace main
                     {
                         nickname = nickname.Substring(2);
                         listOfId.Add(Convert.ToInt64(nickname));
-                        Console.WriteLine(">> same reciepments");
+                        Console.WriteLine(">> Added id: " + nickname);
                     }
                     else
                     {
@@ -222,22 +222,28 @@ namespace main
                         if (!listOfId.Contains(Convert.ToInt64(contenta.response.Id)))
                         {
                             listOfId.Add(contenta.response.Id);
-                            Console.WriteLine(">> same reciepments");
+                            Console.WriteLine(">> Added id: " + contenta.response.Id);
                         }
                     }
                 }
             }
+            foreach (var i in listOfId)
+            {
+                Console.WriteLine(">> id: " + i);
+            }
             return listOfId;
+            
         }
 
         public static void ReSendMessage(Message messageText, VkApi _vk)//главный метод, делающий пересыл сообщений
         {
             Random random = new Random();
+            List<long> ReciepentIdList = GetReciepentIdList(messageText.Body);
             int randomNumber = random.Next(1000, 1000000); //рандом для каптчи и для айди сообщений
             string captcha = randomNumber.ToString();
-            if (GetReciepentIdList(messageText.Body).Count > 0 && GetReciepentIdList(messageText.Body).Count <= 10)
+            if (ReciepentIdList.Count > 0 && ReciepentIdList.Count <= 10)
             {
-                foreach (var i in GetReciepentIdList(messageText.Body))
+                foreach (var i in ReciepentIdList)
                 {
                     string text = SplitStr(messageText.Body);
                     if (text == null || text == " " || text == "")
@@ -311,10 +317,14 @@ namespace main
 
     class Help
     {
-        private static string text = "Бот для ВК. v.0.0.1 \n\r" +
-                              "Доступные функции: \n\r" +
-                              "1)Гороскоп на сегодня или на завтра. Напишите: Гороскоп на сегодня/завтра \"знак зодиака\"\n\r" +
-                              "2)Переслать текст сообщения от имени бота. Напишите: Переслать \"текст сообщения в кавычках(Смайлики пока что не поддержиапются)\" и ссылку/cсылки на страницы получателей(не больше 10 за 1 раз)\n\r";
+        private static Random random = new Random();
+        private static int randomNumber = random.Next(1000, 1000000); 
+        private static string text = "This message was send by Bot. \n\rTime of sending: " +
+                                     DateTime.Now.ToString("HH:mm:ss \n\r") +
+                                     "Message Id: " + randomNumber + "\n\r" + "Бот для ВК. v.0.0.1 \n\r" +
+                                     "Доступные функции: \n\r" +
+                                     "1)Гороскоп на сегодня или на завтра. Напишите: Гороскоп на сегодня/завтра \"знак зодиака\"\n\r" +
+                                     "2)Переслать текст сообщения от имени бота. Напишите: Переслать \"текст сообщения в кавычках(Смайлики пока что не поддержиапются)\" и ссылку/cсылки на страницы получателей(не больше 10 за 1 раз)\n\r";
         static Random rand = new Random();
         static string captcha = rand.Next(10000, 1000000).ToString();
         public static void HelpSend(VkApi _vk, long id)
@@ -341,9 +351,11 @@ namespace main
         private static VkApi _vk;
         private static void OnTimedEvent(object source, ElapsedEventArgs e)
         {
-            Console.WriteLine(">> Time: " + DateTime.Now.ToString("HH:mm:ss"));
+            //Console.WriteLine(">> Time: " + DateTime.Now.ToString("HH:mm:ss"));
             int count = 0;
             ReadOnlyCollection<Message> testMessage = _vk.Messages.Get(MessageType.Received, out count);
+            Random random = new Random();
+            int randomNumber = random.Next(1000, 1000000);
             foreach (Message i in testMessage)
             {
                 if (i.Body.ToLower().Contains("переслать") && !Convert.ToBoolean(i.ReadState))
@@ -371,7 +383,9 @@ namespace main
                     _vk.Messages.Send(
                        Convert.ToInt64(i.UserId),
                        false,
-                       "Type \"Помощь\" to get information about Bot",
+                       "This message was send by Bot. \n\rTime of sending: " +
+                       DateTime.Now.ToString("HH:mm:ss \n\r") +
+                       "Message Id: " + randomNumber + "\n\r" +"Type \"Помощь\" to get information about Bot",
                        "",
                        null,
                        null,
