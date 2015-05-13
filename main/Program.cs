@@ -201,10 +201,11 @@ namespace main
                             nickname = a;
                         }
                     }
-                    if (nickname.Contains("id"))
+                    if (nickname.Contains("id") && !listOfId.Contains(Convert.ToInt64(nickname)))
                     {
                         nickname = nickname.Substring(2);
                         listOfId.Add(Convert.ToInt64(nickname));
+                        Console.WriteLine(">> same reciepments");
                     }
                     else
                     {
@@ -218,7 +219,11 @@ namespace main
                         content = content.Replace('[', ' ');
                         content = content.Replace(']', ' ');
                         Response contenta = JsonConvert.DeserializeObject<Response>(content);
-                        listOfId.Add(contenta.response.Id);
+                        if (!listOfId.Contains(Convert.ToInt64(contenta.response.Id)))
+                        {
+                            listOfId.Add(contenta.response.Id);
+                            Console.WriteLine(">> same reciepments");
+                        }
                     }
                 }
             }
@@ -291,6 +296,19 @@ namespace main
         }
     }
 
+    class AddFriends
+    {
+        public static void AddToFriends(VkApi _vk)
+        {
+            ReadOnlyCollection<long> friendRequestsId = _vk.Friends.GetRequests(4, null);
+            foreach (long i in friendRequestsId)
+            {
+                _vk.Friends.Add(i);
+                Console.WriteLine(">> Added id: " + i);
+            }
+        }
+    }
+
     class Help
     {
         private static string text = "Бот для ВК. v.0.0.1 \n\r" +
@@ -319,6 +337,7 @@ namespace main
     class Program
     {
         private static Timer _timer;
+        private static Timer _timerNew;
         private static VkApi _vk;
         private static void OnTimedEvent(object source, ElapsedEventArgs e)
         {
@@ -366,6 +385,11 @@ namespace main
             }
         }
 
+        private static void RefreshFriends(object source, ElapsedEventArgs e)
+        {
+            AddFriends.AddToFriends(_vk);
+        }
+
         static void Main(string[] args)
         {
             int appid = 4915376;
@@ -394,6 +418,9 @@ namespace main
             }
 
             _timer = new Timer(2500);
+            _timerNew = new Timer(10000);
+            _timerNew.Start();
+            _timerNew.Elapsed += new ElapsedEventHandler(RefreshFriends);
             _timer.Start();
             _timer.Elapsed += new ElapsedEventHandler(OnTimedEvent);
 
