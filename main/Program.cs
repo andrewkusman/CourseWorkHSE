@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -13,9 +12,74 @@ using VkNet.Enums;
 using VkNet.Enums.Filters;
 using VkNet.Exception;
 using VkNet.Model;
+using VkNet.Utils;
 
 namespace main
 {
+    class Content
+    {
+        public string content = null;
+    }
+
+    internal class Anekdot
+    {
+        private static string GetAnekdote()
+        {
+            var req =
+                    (HttpWebRequest)
+                        WebRequest.Create("http://rzhunemogu.ru/RandJSON.aspx?CType=1");
+            var resp = (HttpWebResponse)req.GetResponse();
+            var sr = new StreamReader(resp.GetResponseStream(), Encoding.GetEncoding(1251));
+            var content = sr.ReadToEnd();
+            sr.Close();
+            var contenta = JsonConvert.DeserializeObject<Content>(content);
+            return contenta.content;
+        }
+
+        public static void SendAnekdote(VkApi _vk, long id)
+        {
+            var text = GetAnekdote();
+            var random = new Random();
+            var randomNumber = random.Next(1000, 1000000); //рандом для каптчи и для айди сообщений
+            var captcha = randomNumber.ToString();
+            if (text == null)
+            {
+                _vk.Messages.Send(
+                    id,
+                    false,
+                    "This message was send by Bot. \n\rTime of sending: " +
+                    DateTime.Now.ToString("HH:mm:ss \n\r") +
+                    "Message Id: " + randomNumber + "\n\r" +
+                    "Text of message: \n\rI think you have made a mistake in message, please try again.",
+                    "",
+                    null,
+                    null,
+                    false,
+                    null,
+                    null,
+                    captcha
+                    );
+                Console.WriteLine(">> Message sent back cuz of mistake in it " + id);
+            }
+            else
+            {
+                _vk.Messages.Send(
+                    id,
+                    false,
+                    text,
+                    "",
+                    null,
+                    null,
+                    false,
+                    null,
+                    null,
+                    captcha
+                    );
+                Console.WriteLine(">> Id sent to: " + id);
+            }
+        }
+    }
+
     class Person
     {
         public long Id;
@@ -33,7 +97,7 @@ namespace main
         private static string GetHorolink(string incStr, out string horo)
         {
 
-            Dictionary<string, string> horoscopes = new Dictionary<string, string>
+            var horoscopes = new Dictionary<string, string>
             {
                 {"овен", "http://astroscope.ru/horoskop/ejednevniy_goroskop/aries.html"},
                 {"весы", "http://astroscope.ru/horoskop/ejednevniy_goroskop/libra.html"},
@@ -79,10 +143,10 @@ namespace main
         }
         private static string GetHoroscope(string incStr, out string horoName)
         {
-            string horoscope = "No Horoscope";
-            string pattern = "(<div class=\"goroskop\">(.+)</div>)";
+            var horoscope = "No Horoscope";
+            var pattern = "(<div class=\"goroskop\">(.+)</div>)";
             string horoname = null;
-            string horoLink = GetHorolink(incStr, out horoname);
+            var horoLink = GetHorolink(incStr, out horoname);
             horoName = horoname;
             if (horoLink == null)
             {
@@ -96,10 +160,10 @@ namespace main
                         WebRequest.Create(horoLink);
                 var resp = (HttpWebResponse) req.GetResponse();
                 var sr = new StreamReader(resp.GetResponseStream(), Encoding.GetEncoding(1251));
-                string content = sr.ReadToEnd();
+                var content = sr.ReadToEnd();
                 sr.Close();
-                MatchCollection matches = Regex.Matches(content, pattern);
-                foreach (Match match in matches.Cast<Match>().Where(match => matches.Count != 0))
+                var matches = Regex.Matches(content, pattern);
+                foreach (var match in matches.Cast<Match>().Where(match => matches.Count != 0))
                 {
                     horoscope = match.Groups[2].Value;
                 }
@@ -110,11 +174,11 @@ namespace main
         public static void SendHoroscope(Message incStr, VkApi _vk)
         {
 
-            Random random = new Random();
-            int randomNumber = random.Next(1000, 1000000); //рандом для каптчи и для айди сообщений
-            string captcha = randomNumber.ToString();
+            var random = new Random();
+            var randomNumber = random.Next(1000, 1000000); //рандом для каптчи и для айди сообщений
+            var captcha = randomNumber.ToString();
             string horoName = null;
-            string text = GetHoroscope(incStr.Body, out horoName);
+            var text = GetHoroscope(incStr.Body, out horoName);
             var i = Convert.ToInt64(incStr.UserId);
             if (text == null)
             {
@@ -162,11 +226,11 @@ namespace main
             try
             {
                 text += " ";
-                bool flag = false;
+                var flag = false;
                 string result = null;
-                int tmp1 = 0;
-                int tmp2 = 0;
-                for (int i = 1; i < text.Length; i++)
+                var tmp1 = 0;
+                var tmp2 = 0;
+                for (var i = 1; i < text.Length; i++)
                 {
                     if (text[i - 1] != '\"' || i < 1) continue;
                     else if (!flag)
@@ -187,9 +251,9 @@ namespace main
 
         private static List<long> GetReciepentIdList(string text) //Функция, возвращающая лист айди пользователей
         {                                                         //кому переслать сообщение
-            string[] message = text.Split(' ');
-            List<long> listOfId = new List<long>();
-            foreach (string i in message)
+            var message = text.Split(' ');
+            var listOfId = new List<long>();
+            foreach (var i in message)
             {
                 if (i.Contains("vk.com"))
                 {
@@ -214,11 +278,11 @@ namespace main
                                 WebRequest.Create("http://api.vk.com/method/users.get?user_ids=" + nickname + "&v=5.30");
                         var resp = (HttpWebResponse)req.GetResponse();
                         var sr = new StreamReader(resp.GetResponseStream());
-                        string content = sr.ReadToEnd();
+                        var content = sr.ReadToEnd();
                         sr.Close();
                         content = content.Replace('[', ' ');
                         content = content.Replace(']', ' ');
-                        Response contenta = JsonConvert.DeserializeObject<Response>(content);
+                        var contenta = JsonConvert.DeserializeObject<Response>(content);
                         if (!listOfId.Contains(Convert.ToInt64(contenta.response.Id)))
                         {
                             listOfId.Add(contenta.response.Id);
@@ -237,15 +301,15 @@ namespace main
 
         public static void ReSendMessage(Message messageText, VkApi _vk)//главный метод, делающий пересыл сообщений
         {
-            Random random = new Random();
-            List<long> ReciepentIdList = GetReciepentIdList(messageText.Body);
-            int randomNumber = random.Next(1000, 1000000); //рандом для каптчи и для айди сообщений
-            string captcha = randomNumber.ToString();
+            var random = new Random();
+            var ReciepentIdList = GetReciepentIdList(messageText.Body);
+            var randomNumber = random.Next(1000, 1000000); //рандом для каптчи и для айди сообщений
+            var captcha = randomNumber.ToString();
             if (ReciepentIdList.Count > 0 && ReciepentIdList.Count <= 10)
             {
                 foreach (var i in ReciepentIdList)
                 {
-                    string text = SplitStr(messageText.Body);
+                    var text = SplitStr(messageText.Body);
                     if (text == null || text == " " || text == "")
                     {
                         _vk.Messages.Send(
@@ -301,13 +365,12 @@ namespace main
 
         }
     }
-
     class AddFriends
     {
         public static void AddToFriends(VkApi _vk)
         {
-            ReadOnlyCollection<long> friendRequestsId = _vk.Friends.GetRequests(4, null);
-            foreach (long i in friendRequestsId)
+            var friendRequestsId = _vk.Friends.GetRequests(4, null);
+            foreach (var i in friendRequestsId)
             {
                 _vk.Friends.Add(i);
                 Help.HelpSend(_vk, i);
@@ -315,7 +378,6 @@ namespace main
             }
         }
     }
-
     class Help
     {
         private static Random random = new Random();
@@ -353,11 +415,11 @@ namespace main
         private static void OnTimedEvent(object source, ElapsedEventArgs e)
         {
             //Console.WriteLine(">> Time: " + DateTime.Now.ToString("HH:mm:ss"));
-            int count = 100;
-            ReadOnlyCollection<Message> testMessage = _vk.Messages.Get(MessageType.Received, out count);
-            Random random = new Random();
-            int randomNumber = random.Next(1000, 1000000);
-            foreach (Message i in testMessage)
+            var count = 100;
+            var testMessage = _vk.Messages.Get(MessageType.Received, out count);
+            var random = new Random();
+            var randomNumber = random.Next(1000, 1000000);
+            foreach (var i in testMessage)
             {
                 if (i.Body.ToLower().Contains("переслать") && !Convert.ToBoolean(i.ReadState))
                 {
@@ -377,9 +439,16 @@ namespace main
                     Console.WriteLine(">> Help was Send");
                     _vk.Messages.MarkAsRead(Convert.ToInt64(i.Id));
                 }
+                else if (i.Body.ToLower().Contains("анекдот") && !i.Body.ToLower().Contains("переслать") &&
+                         !Convert.ToBoolean(i.ReadState))
+                {
+                    Anekdot.SendAnekdote(_vk, Convert.ToInt64(i.UserId));
+                    Console.WriteLine(">> Anekdote was send");
+                    _vk.Messages.MarkAsRead(Convert.ToInt64(i.Id));
+                }
                 else if(!Convert.ToBoolean(i.ReadState))
                 {
-                    Random rand = new Random();
+                    var rand = new Random();
                     var captcha = rand.Next(10000, 1000000).ToString();
                     _vk.Messages.Send(
                        Convert.ToInt64(i.UserId),
@@ -408,25 +477,28 @@ namespace main
 
         static void Main(string[] args)
         {
-            int appid = 4915376;
-            string email = "89263014118";
-            string password = Console.ReadLine();
-            Settings mess = Settings.Messages;
-            Settings friends = Settings.Friends;
+            var appid = 4915376;
+            var email = "89263014118";
+            var password = Console.ReadLine();
+            var mess = Settings.Messages;
+            var friends = Settings.Friends;
             
             
 
             
             _vk = new VkApi();
-
+            
 
             try
             {
+                VkAuthorization vkAuth = null;
+                //string ololo = vkAuth.ExpiresIn;
                 _vk.Authorize(appid, email, password, mess | friends);
                 Console.WriteLine(_vk.AccessToken);
+                //Console.WriteLine(ololo);
                 Console.WriteLine("Authorization successfull");
             }
-            catch (CaptchaNeededException e)
+            catch (VkApiAuthorizationException e)
             {
                 Console.WriteLine(e);
                 Console.ReadKey();
