@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Timers;
 using Newtonsoft.Json;
 using VkNet;
@@ -14,6 +15,7 @@ using VkNet.Enums.Filters;
 using VkNet.Exception;
 using VkNet.Model;
 using VkNet.Utils;
+using Timer = System.Timers.Timer;
 
 namespace main
 {
@@ -639,11 +641,15 @@ namespace main
 
     class Interpretator
     {
-        public static void Interpretate(ReadOnlyCollection<Message> message, VkApi _vk)
+        private static ReadOnlyCollection<Message> mainList; 
+        //public static void Interpretate(ReadOnlyCollection<Message> message, VkApi _vk)
+        public static void Interpretate(object message, object test)
         {
+            VkApi _vk = (VkApi)test;
+            mainList = (ReadOnlyCollection<Message>)message;
             var random = new Random();
             var randomNumber = random.Next(1000, 1000000);
-            foreach (var i in message)
+            foreach (var i in mainList)
             {
                 if (i.Body.ToLower().Contains("переслать") && !Convert.ToBoolean(i.ReadState))
                 {
@@ -730,7 +736,7 @@ namespace main
             //Console.WriteLine(">> Time: " + DateTime.Now.ToString("HH:mm:ss"));
             var count = 100;
             var testMessage = _vk.Messages.Get(MessageType.Received, out count);
-            Interpretator.Interpretate(testMessage, _vk);
+            new Thread(() => Interpretator.Interpretate(testMessage, _vk)).Start();
             
         }//Каждые 3 секунды проверяем входящие сообщения
 
