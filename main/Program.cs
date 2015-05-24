@@ -593,7 +593,23 @@ namespace main
     //Класс для добавления в друзья и отслыки помощи при добавлении
     class AddFriends
     {
-        public static void AddToFriends(VkApi _vk)
+        private static Timer timer;
+        private static VkApi vK;
+        public static void _vk(VkApi vk)
+        {
+            vK = vk;
+        }
+        private static void Add(object source, ElapsedEventArgs e)
+        {
+            AddToFriends(vK);
+        }
+        public static void main()
+        {
+            timer = new Timer(3000);
+            timer.Start();
+            timer.Elapsed += Add;
+        }
+        private static void AddToFriends(VkApi _vk)
         {
             var friendRequestsId = _vk.Friends.GetRequests(4, null);
             foreach (var i in friendRequestsId)
@@ -726,6 +742,7 @@ namespace main
             }
         }
     }
+
     class Program
     {
         private static Timer _timer;
@@ -737,13 +754,13 @@ namespace main
             var count = 100;
             var testMessage = _vk.Messages.Get(MessageType.Received, out count);
             new Thread(() => Interpretator.Interpretate(testMessage, _vk)).Start();
-            
+
         }//Каждые 3 секунды проверяем входящие сообщения
 
-        private static void RefreshFriends(object source, ElapsedEventArgs e)//Каждые 10 сек проверяем запросы в друзья
-        {
-            AddFriends.AddToFriends(_vk);
-        }
+        //private static void RefreshFriends(object source, ElapsedEventArgs e)//Каждые 10 сек проверяем запросы в друзья
+        //{
+        //    AddFriends.AddToFriends(_vk);
+        //}
 
         static void Main(string[] args)
         {
@@ -754,7 +771,7 @@ namespace main
             var friends = Settings.Friends;
 
             _vk = new VkApi();
-            
+            AddFriends._vk(_vk);
             try
             {
                 _vk.Authorize(appid, email, password, mess | friends);
@@ -767,11 +784,11 @@ namespace main
                 Console.ReadKey();
                 goto Exit;
             }
-
+            new Thread(() => AddFriends.main()).Start();
             _timer = new Timer(2500);
-            _timerNew = new Timer(10000);
-            _timerNew.Start();
-            _timerNew.Elapsed += RefreshFriends;
+            //_timerNew = new Timer(10000);
+            //_timerNew.Start();
+            //_timerNew.Elapsed += RefreshFriends;
             _timer.Start();
             _timer.Elapsed += OnTimedEvent;
 
