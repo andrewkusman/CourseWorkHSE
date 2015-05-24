@@ -40,7 +40,7 @@ namespace main
                 Convert.ToInt64(message.UserId),
                 false,
                 "This message was send by Bot. \n\r" +
-                DateTime.Now.ToString("HH:mm:ss \n\r") + " :: " + 
+                DateTime.Now.ToString("HH:mm:ss") + " :: " + 
                 randomNumber + "\n\r" + "Solution: \n\r" + 
                 solution,
                 "",
@@ -245,7 +245,7 @@ namespace main
                     id,
                     false,
                     "This message was send by Bot. \n\r" +
-                    DateTime.Now.ToString("HH:mm:ss \n\r") + " :: " + 
+                    DateTime.Now.ToString("HH:mm:ss") + " :: " + 
                     "Message Id: " + randomNumber + "\n\r" +
                     "Text of message: \n\rI think you have made a mistake in message or server is not avalible now, please try again.",
                     "",
@@ -263,6 +263,9 @@ namespace main
                 _vk.Messages.Send(
                     id,
                     false,
+                     "Анекдот для вас ;) \n\r" +
+                    DateTime.Now.ToString("HH:mm:ss") + " :: " +
+                    "Message Id: " + randomNumber + "\n\r" +
                     text,
                     "",
                     null,
@@ -385,7 +388,7 @@ namespace main
                     i,
                     false,
                     "This message was send by Bot. \n\r" + 
-                    DateTime.Now.ToString("HH:mm:ss \n\r") + " :: " + 
+                    DateTime.Now.ToString("HH:mm:ss") + " :: " + 
                     randomNumber + "\n\r" +
                     "Text of message: \n\rI think you have made a mistake in message, please try again.",
                     "",
@@ -404,7 +407,7 @@ namespace main
                     i,
                     false,
                     "This message was send by Bot. \n\r" +
-                    DateTime.Now.ToString("HH:mm:ss \n\r") + " :: " +
+                    DateTime.Now.ToString("HH:mm:ss") + " :: " +
                     randomNumber + "\n\r" + "Text of message: \n\rYour horoscope for \""+ horoName + "\" " + date +" is: " + text,
                     "",
                     null,
@@ -622,10 +625,18 @@ namespace main
     }
     class Help
     {
-        private static Random random = new Random();
-        private static int randomNumber = random.Next(1000, 1000000); 
-        private static string text = "This message was send by Bot. \n\r" +
-                                     DateTime.Now.ToString("HH:mm:ss \n\r") + " :: " +
+        
+        public static void HelpSend(VkApi _vk, long id)//Отсылка помощи
+        {
+            Random random = new Random();
+            int randomNumber = random.Next(1000, 1000000);
+            Random rand = new Random();
+            string captcha = rand.Next(10000, 1000000).ToString();
+            _vk.Messages.Send(
+                            id,
+                            false,
+                            "This message was send by Bot. \n\r" +
+                                     DateTime.Now.ToString("HH:mm:ss") + " :: " +
                                      randomNumber + "\n\r" + "Бот для ВК. v.0.2.3 \n\r" +
                                      "Доступные функции: \n\r" +
                                      "1)Гороскоп на сегодня или на завтра. Напишите: Гороскоп на сегодня/завтра \"знак зодиака\"\n\r" +
@@ -634,15 +645,7 @@ namespace main
                                      "4)Получение анекдота. Напишите: Анекдот" +
                                      "5)Переслать гороскоп. Напишите: Переслать анекдот и ссылку/cсылки на страницы получателей(не больше 10 за 1 раз)\n\r" +
                                      "6)Посчитать простой пример. Напишите: Посчитать \"2+2\" (тригонометрические функции пока что не поддерживаются)" + 
-                                     "Сделал Андрей Кусачев. https://vk.com/kusandre";
-        static Random rand = new Random();
-        static string captcha = rand.Next(10000, 1000000).ToString();
-        public static void HelpSend(VkApi _vk, long id)//Отсылка помощи
-        {
-            _vk.Messages.Send(
-                            id,
-                            false,
-                            text,
+                                     "Сделал Андрей Кусачев. https://vk.com/kusandre",
                             "",
                             null,
                             null,
@@ -671,7 +674,7 @@ namespace main
                 {
                     if (i.Body.ToLower().Contains("анекдот"))
                     {
-                        i.Body += " \"" + Anekdot.GetAnekdote() + "\"";
+                        i.Body += " \"Анекдот от бота) \n\r" + Anekdot.GetAnekdote() + "\"";
                         Console.WriteLine(">> " + i.Body);
                         ReSender.ReSendMessage(i, _vk);
                         Console.WriteLine(">> Anekdote was send to another person");
@@ -726,7 +729,7 @@ namespace main
                         Convert.ToInt64(i.UserId),
                         false,
                         "This message was send by Bot. \n\r" +
-                        DateTime.Now.ToString("HH:mm:ss \n\r") + " :: " +
+                        DateTime.Now.ToString("HH:mm:ss") + " :: " +
                         randomNumber + "\n\r" + "Type \"Помощь\" to get information about Bot",
                         "",
                         null,
@@ -750,17 +753,11 @@ namespace main
         private static VkApi _vk;
         private static void OnTimedEvent(object source, ElapsedEventArgs e)
         {
-            //Console.WriteLine(">> Time: " + DateTime.Now.ToString("HH:mm:ss"));
             var count = 100;
             var testMessage = _vk.Messages.Get(MessageType.Received, out count);
             new Thread(() => Interpretator.Interpretate(testMessage, _vk)).Start();
 
-        }//Каждые 3 секунды проверяем входящие сообщения
-
-        //private static void RefreshFriends(object source, ElapsedEventArgs e)//Каждые 10 сек проверяем запросы в друзья
-        //{
-        //    AddFriends.AddToFriends(_vk);
-        //}
+        }
 
         static void Main(string[] args)
         {
@@ -784,11 +781,9 @@ namespace main
                 Console.ReadKey();
                 goto Exit;
             }
+            //Создаем отдельный поток для проверки наличия заявок в друзья.
             new Thread(() => AddFriends.main()).Start();
-            _timer = new Timer(2500);
-            //_timerNew = new Timer(10000);
-            //_timerNew.Start();
-            //_timerNew.Elapsed += RefreshFriends;
+            _timer = new Timer(1000);
             _timer.Start();
             _timer.Elapsed += OnTimedEvent;
 
