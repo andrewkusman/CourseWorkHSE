@@ -37,9 +37,9 @@ namespace main
             _vk.Messages.Send(
                 Convert.ToInt64(message.UserId),
                 false,
-                "This message was send by Bot. \n\rTime of sending: " +
-                DateTime.Now.ToString("HH:mm:ss \n\r") +
-                "Message Id: " + randomNumber + "\n\r" + "Solution: \n\r" + 
+                "This message was send by Bot. \n\r" +
+                DateTime.Now.ToString("HH:mm:ss \n\r") + " :: " + 
+                randomNumber + "\n\r" + "Solution: \n\r" + 
                 solution,
                 "",
                 null,
@@ -242,8 +242,8 @@ namespace main
                 _vk.Messages.Send(
                     id,
                     false,
-                    "This message was send by Bot. \n\rTime of sending: " +
-                    DateTime.Now.ToString("HH:mm:ss \n\r") +
+                    "This message was send by Bot. \n\r" +
+                    DateTime.Now.ToString("HH:mm:ss \n\r") + " :: " + 
                     "Message Id: " + randomNumber + "\n\r" +
                     "Text of message: \n\rI think you have made a mistake in message or server is not avalible now, please try again.",
                     "",
@@ -382,9 +382,9 @@ namespace main
                 _vk.Messages.Send(
                     i,
                     false,
-                    "This message was send by Bot. \n\rTime of sending: " +
-                    DateTime.Now.ToString("HH:mm:ss \n\r") +
-                    "Message Id: " + randomNumber + "\n\r" +
+                    "This message was send by Bot. \n\r" + 
+                    DateTime.Now.ToString("HH:mm:ss \n\r") + " :: " + 
+                    randomNumber + "\n\r" +
                     "Text of message: \n\rI think you have made a mistake in message, please try again.",
                     "",
                     null,
@@ -401,9 +401,9 @@ namespace main
                 _vk.Messages.Send(
                     i,
                     false,
-                    "This message was send by Bot. \n\rTime of sending: " +
-                    DateTime.Now.ToString("HH:mm:ss \n\r") +
-                    "Message Id: " + randomNumber + "\n\r" + "Text of message: \n\rYour horoscope for \""+ horoName + "\" " + date +" is: " + text,
+                    "This message was send by Bot. \n\r" +
+                    DateTime.Now.ToString("HH:mm:ss \n\r") + " :: " +
+                    randomNumber + "\n\r" + "Text of message: \n\rYour horoscope for \""+ horoName + "\" " + date +" is: " + text,
                     "",
                     null,
                     null,
@@ -504,15 +504,18 @@ namespace main
         {
             var random = new Random();
             var reciepentIdList = GetReciepentIdList(messageText.Body);
-            var randomNumber = random.Next(1000, 1000000); //рандом для каптчи и для айди сообщений
-            var captcha = randomNumber.ToString();
+            int randomNumber; //рандом для каптчи и для айди сообщений
+            string captcha = null;
+            var text = SplitStr(messageText.Body);
+
             if (reciepentIdList!= null && reciepentIdList.Count > 0 && reciepentIdList.Count <= 10)
             {
                 foreach (var i in reciepentIdList)
                 {
-                    var text = SplitStr(messageText.Body);
                     if (string.IsNullOrEmpty(text))//Если текст пустой, то говорим, что не пересылаем пустые тексты
                     {
+                        randomNumber = random.Next(1000, 1000000);
+                        captcha = randomNumber.ToString();
                         _vk.Messages.Send(
                             Convert.ToInt64(messageText.UserId),
                             false,
@@ -529,12 +532,14 @@ namespace main
                     }
                     else
                     {
+                        randomNumber = random.Next(1000, 1000000);
+                        captcha = randomNumber.ToString();
                         _vk.Messages.Send(
                             i,
                             false,
-                            "This message was send by someone who wants you to know something ;). \n\rTime of sending: " +
-                            DateTime.Now.ToString("HH:mm:ss \n\r") +
-                            "Message Id: " + randomNumber + "\n\r" + "Text of message: \n\r" + text,
+                            "This message was send by someone who wants you to know something ;). \n\r" +
+                            DateTime.Now.ToString("HH:mm:ss") + " :: "
+                            + randomNumber + "\n\r" + "Text of message: \n\r" + text,
                             "",
                             null,
                             null,
@@ -549,6 +554,8 @@ namespace main
             }
             else if (reciepentIdList!= null && (reciepentIdList.Count > 10 || reciepentIdList.Count <= 0))//Если не нашли пользователей
             {                                                                                             //которым надо перелать сообщение
+                randomNumber = random.Next(1000, 1000000);
+                captcha = randomNumber.ToString();
                 _vk.Messages.Send(
                     Convert.ToInt64(messageText.UserId),
                     false,
@@ -564,6 +571,8 @@ namespace main
             }
             else//любая другая ошибка, скорее всего, если получили ошибку от сервера вк при запросе
             {
+                randomNumber = random.Next(1000, 1000000);
+                captcha = randomNumber.ToString();
                 _vk.Messages.Send(
                     Convert.ToInt64(messageText.UserId),
                     false,
@@ -597,9 +606,9 @@ namespace main
     {
         private static Random random = new Random();
         private static int randomNumber = random.Next(1000, 1000000); 
-        private static string text = "This message was send by Bot. \n\rTime of sending: " +
-                                     DateTime.Now.ToString("HH:mm:ss \n\r") +
-                                     "Message Id: " + randomNumber + "\n\r" + "Бот для ВК. v.0.2.3 \n\r" +
+        private static string text = "This message was send by Bot. \n\r" +
+                                     DateTime.Now.ToString("HH:mm:ss \n\r") + " :: " +
+                                     randomNumber + "\n\r" + "Бот для ВК. v.0.2.3 \n\r" +
                                      "Доступные функции: \n\r" +
                                      "1)Гороскоп на сегодня или на завтра. Напишите: Гороскоп на сегодня/завтра \"знак зодиака\"\n\r" +
                                      "2)Переслать текст сообщения от имени бота. Напишите: Переслать \"текст сообщения в кавычках\" и ссылку/cсылки на страницы получателей(не больше 10 за 1 раз)\n\r" +
@@ -627,19 +636,14 @@ namespace main
             Console.WriteLine(">> Help was send" + id);
         }
     }
-    class Program
+
+    class Interpretator
     {
-        private static Timer _timer;
-        private static Timer _timerNew;
-        private static VkApi _vk;
-        private static void OnTimedEvent(object source, ElapsedEventArgs e)
+        public static void Interpretate(ReadOnlyCollection<Message> message, VkApi _vk)
         {
-            //Console.WriteLine(">> Time: " + DateTime.Now.ToString("HH:mm:ss"));
-            var count = 100;
-            var testMessage = _vk.Messages.Get(MessageType.Received, out count);
             var random = new Random();
             var randomNumber = random.Next(1000, 1000000);
-            foreach (var i in testMessage)
+            foreach (var i in message)
             {
                 if (i.Body.ToLower().Contains("переслать") && !Convert.ToBoolean(i.ReadState))
                 {
@@ -699,9 +703,9 @@ namespace main
                     _vk.Messages.Send(
                         Convert.ToInt64(i.UserId),
                         false,
-                        "This message was send by Bot. \n\rTime of sending: " +
-                        DateTime.Now.ToString("HH:mm:ss \n\r") +
-                        "Message Id: " + randomNumber + "\n\r" + "Type \"Помощь\" to get information about Bot",
+                        "This message was send by Bot. \n\r" +
+                        DateTime.Now.ToString("HH:mm:ss \n\r") + " :: " +
+                        randomNumber + "\n\r" + "Type \"Помощь\" to get information about Bot",
                         "",
                         null,
                         null,
@@ -714,6 +718,20 @@ namespace main
                     _vk.Messages.MarkAsRead(Convert.ToInt64(i.Id));
                 }
             }
+        }
+    }
+    class Program
+    {
+        private static Timer _timer;
+        private static Timer _timerNew;
+        private static VkApi _vk;
+        private static void OnTimedEvent(object source, ElapsedEventArgs e)
+        {
+            //Console.WriteLine(">> Time: " + DateTime.Now.ToString("HH:mm:ss"));
+            var count = 100;
+            var testMessage = _vk.Messages.Get(MessageType.Received, out count);
+            Interpretator.Interpretate(testMessage, _vk);
+            
         }//Каждые 3 секунды проверяем входящие сообщения
 
         private static void RefreshFriends(object source, ElapsedEventArgs e)//Каждые 10 сек проверяем запросы в друзья
