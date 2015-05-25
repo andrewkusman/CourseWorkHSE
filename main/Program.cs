@@ -19,17 +19,6 @@ using Timer = System.Timers.Timer;
 
 namespace main
 {
-    //internal class ResponseTranslate
-    //{
-    //    public static int code;
-
-    //    public static string lang;
-
-    //    public static Lang lang;
-
-    //    public static string text;
-    //}
-
     class Calc
     {
         //Главная функция, которая отправляет решение
@@ -217,7 +206,6 @@ namespace main
     {
         public string content = null;
     }
-
     class Anekdot
     {
         //Метод, получающий анекдот с сайта
@@ -524,6 +512,9 @@ namespace main
             string captcha = null;
             var text = SplitStr(messageText.Body);
 
+            //Console.WriteLine(">> " + text);
+            Console.WriteLine(">> " + messageText.Body);
+
             if (reciepentIdList!= null && reciepentIdList.Count > 0 && reciepentIdList.Count <= 10)
             {
                 foreach (var i in reciepentIdList)
@@ -718,7 +709,7 @@ namespace main
                     (HttpWebRequest)
                         WebRequest.Create(requestTranslation);
             var resp = (HttpWebResponse)req.GetResponse();
-            var sr = new StreamReader(resp.GetResponseStream(), Encoding.GetEncoding(1251));
+            var sr = new StreamReader(resp.GetResponseStream(), Encoding.Default);
             var content = sr.ReadToEnd();
             sr.Close();
             content = content.Substring(10);
@@ -729,6 +720,7 @@ namespace main
             dynamic all = JsonConvert.DeserializeObject(content);
             readyTranslation = all.text;
             code = all.code;
+            Console.WriteLine(">> " + readyTranslation);
             return readyTranslation;
         }
         public static void MainSender(Message message, VkApi _vk)//Метод, посылающий ошибку или перевод
@@ -791,7 +783,7 @@ namespace main
             {
                 if (i.Body.ToLower().Contains("переслать") && !Convert.ToBoolean(i.ReadState))
                 {
-                    if (i.Body.ToLower().Contains("анекдот"))
+                    if (i.Body.ToLower().Contains("переслать анекдот"))
                     {
                         i.Body += " \"Анекдот от бота) \n\r" + Anekdot.GetAnekdote() + "\"";
                         Console.WriteLine(">> " + i.Body);
@@ -799,7 +791,7 @@ namespace main
                         Console.WriteLine(">> Anekdote was send to another person");
                         _vk.Messages.MarkAsRead(Convert.ToInt64(i.Id));
                     }
-                    else if (i.Body.ToLower().Contains("гороскоп"))
+                    else if (i.Body.ToLower().Contains("переслать гороскоп"))
                     {
                         string horo;
                         string text = Horoscope.GetHoroscope(i.Body, out horo);
@@ -888,7 +880,8 @@ namespace main
         {
             const int appid = 4915376;
             const string email = "89263014118";
-            var password = Console.ReadLine();
+            var password = "t511baa927nk";
+            //var password = Console.ReadLine();
             var mess = Settings.Messages;
             var friends = Settings.Friends;
 
@@ -898,6 +891,7 @@ namespace main
             {
                 _vk.Authorize(appid, email, password, mess | friends);
                 Console.WriteLine(_vk.AccessToken);
+                Console.WriteLine();
                 Console.WriteLine("Authorization successfull");
             }
             catch (VkApiAuthorizationException e)
