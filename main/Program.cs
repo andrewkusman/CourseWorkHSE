@@ -19,6 +19,17 @@ using Timer = System.Timers.Timer;
 
 namespace main
 {
+    //internal class ResponseTranslate
+    //{
+    //    public static int code;
+
+    //    public static string lang;
+
+    //    public static Lang lang;
+
+    //    public static string text;
+    //}
+
     class Calc
     {
         //Главная функция, которая отправляет решение
@@ -244,10 +255,10 @@ namespace main
                 _vk.Messages.Send(
                     id,
                     false,
-                    "This message was send by Bot. \n\r" +
+                    "Сообщение выслано ботом. \n\r" +
                     DateTime.Now.ToString("HH:mm:ss") + " :: " + 
-                    "Message Id: " + randomNumber + "\n\r" +
-                    "Text of message: \n\rI think you have made a mistake in message or server is not avalible now, please try again.",
+                    randomNumber + "\n\r" +
+                    "Текст сообщения: \n\rВозможно вы допустили ошибку в сообщении, но, скорее всего, сервер с анекдотами недоступен. Повторите попытку",
                     "",
                     null,
                     null,
@@ -265,7 +276,7 @@ namespace main
                     false,
                      "Анекдот для вас ;) \n\r" +
                     DateTime.Now.ToString("HH:mm:ss") + " :: " +
-                    "Message Id: " + randomNumber + "\n\r" +
+                    randomNumber + "\n\r" +
                     text,
                     "",
                     null,
@@ -325,13 +336,13 @@ namespace main
                             horoscopes[i.ToLower()].Substring(0,
                                 horoscopes[i.ToLower()].Length - 5) + "_zavtra.html";//Меняем строку запроса на сервер
                         horoTmp = i;
-                        date = "for tomorrow";
+                        date = "на завтра";
                     }
                     else
                     {
                         tmp = horoscopes[i.ToLower()];
                         horoTmp = i;
-                        date = "for today";
+                        date = "на сегодня";
                     }
                 }
                 catch
@@ -345,7 +356,7 @@ namespace main
         //Получаем сам гороскоп
         public static string GetHoroscope(string incStr, out string horoName)
         {
-            var horoscope = "No Horoscope";
+            var horoscope = "Нет гороскопв";
             var pattern = "(<div class=\"goroskop\">(.+)</div>)";
             string horoname = null;
             var horoLink = GetHorolink(incStr, out horoname);
@@ -387,10 +398,10 @@ namespace main
                 _vk.Messages.Send(
                     i,
                     false,
-                    "This message was send by Bot. \n\r" + 
+                    "Это сообщение отослано ботом. \n\r" + 
                     DateTime.Now.ToString("HH:mm:ss") + " :: " + 
                     randomNumber + "\n\r" +
-                    "Text of message: \n\rI think you have made a mistake in message, please try again.",
+                    "Текст сообщения: \n\rСкорее всего вы сделали ошибку в сообщениее, пожалуйста, повторите еще раз.",
                     "",
                     null,
                     null,
@@ -406,9 +417,9 @@ namespace main
                 _vk.Messages.Send(
                     i,
                     false,
-                    "This message was send by Bot. \n\r" +
+                    "Это сообщение отослано ботом. \n\r" +
                     DateTime.Now.ToString("HH:mm:ss") + " :: " +
-                    randomNumber + "\n\r" + "Text of message: \n\rYour horoscope for \""+ horoName + "\" " + date +" is: " + text,
+                    randomNumber + "\n\r" + "Текст сообщения: \n\rВаш гороскоп \""+ horoName + "\" " + date +" : " + text,
                     "",
                     null,
                     null,
@@ -423,8 +434,8 @@ namespace main
     }
     class ReSender
     {
-        private static string errText = "Can't resend empty message";
-        private static string SplitStr(string text) //Функция, возвращающая текст, заключенный в " "
+        private static string errText = "Не могу отправить пустое сообщение";
+        public static string SplitStr(string text) //Функция, возвращающая текст, заключенный в " "
         {                                           //из исходного сообщения
             try
             {
@@ -542,9 +553,9 @@ namespace main
                         _vk.Messages.Send(
                             i,
                             false,
-                            "This message was send by someone who wants you to know something ;). \n\r" +
+                            "Это сообщение было отправлено анонимно. \n\r" +
                             DateTime.Now.ToString("HH:mm:ss") + " :: "
-                            + randomNumber + "\n\r" + "Text of message: \n\r" + text,
+                            + randomNumber + "\n\r" + "Текст сообщения: \n\r" + text,
                             "",
                             null,
                             null,
@@ -564,7 +575,7 @@ namespace main
                 _vk.Messages.Send(
                     Convert.ToInt64(messageText.UserId),
                     false,
-                    "The amount of recievers has to be more than 0 and less than 11",
+                    "Количество получателей должно быть больше 0 и меньше 11",
                     "",
                     null,
                     null,
@@ -581,7 +592,7 @@ namespace main
                 _vk.Messages.Send(
                     Convert.ToInt64(messageText.UserId),
                     false,
-                    "Maybe you have made a mistake in link?",
+                    "Возможно вы сделали ошибку в ссылке?",
                     "",
                     null,
                     null,
@@ -635,16 +646,17 @@ namespace main
             _vk.Messages.Send(
                             id,
                             false,
-                            "This message was send by Bot. \n\r" +
+                            "Это сообщение отослано ботом. \n\r" +
                                      DateTime.Now.ToString("HH:mm:ss") + " :: " +
                                      randomNumber + "\n\r" + "Бот для ВК. v.0.2.3 \n\r" +
                                      "Доступные функции: \n\r" +
-                                     "1)Гороскоп на сегодня или на завтра. Напишите: Гороскоп на сегодня/завтра \"знак зодиака\"\n\r" +
+                                     "1)Гороскоп на сегодня или на завтра. Напишите: Гороскоп на сегодня/завтра \"знак зодиака(без кавычек)\"\n\r" +
                                      "2)Переслать текст сообщения от имени бота. Напишите: Переслать \"текст сообщения в кавычках\" и ссылку/cсылки на страницы получателей(не больше 10 за 1 раз)\n\r" +
                                      "3)Переслать анекдот кому-то от имени бота. Напишите: Переслать анекдот и ссылку/cсылки на страницы получателей(не больше 10 за 1 раз)\n\r" + 
-                                     "4)Получение анекдота. Напишите: Анекдот" +
+                                     "4)Получение анекдота. Напишите: Анекдот\n\r" +
                                      "5)Переслать гороскоп. Напишите: Переслать анекдот и ссылку/cсылки на страницы получателей(не больше 10 за 1 раз)\n\r" +
-                                     "6)Посчитать простой пример. Напишите: Посчитать \"2+2\" (тригонометрические функции пока что не поддерживаются)" + 
+                                     "6)Посчитать простой пример. Напишите: Посчитать \"2+2(без кавычек)\" (тригонометрические функции пока что не поддерживаются)" +
+                                     "7)Перевести введенный текст на заданный. Напишите: Перевести на \"язык(без кавычек, например, русский)\" \"текст, который требуется перевести(без кавычек)\". Переведено сервисом «Яндекс.Перевод» http://translate.yandex.ru/." + 
                                      "Сделал Андрей Кусачев. https://vk.com/kusandre",
                             "",
                             null,
@@ -657,7 +669,114 @@ namespace main
             Console.WriteLine(">> Help was send" + id);
         }
     }
+    //Класс для перевода текста.
+    class Translator
+    {
+         
+        private static string GetText(string incText)
+        {
+            string outText = ReSender.SplitStr(incText).Replace(" ", "+");
+            return outText;
+        }
 
+        private static string GetLanguage(string incText)
+        {
+            var languages = new Dictionary<string, string>//Словарь для получения языка для перевода
+            {
+                {"албанский", "sq"},{"английский", "en"},{"арабский", "ar"},{"армянский", "hy"},{"азербайджанский", "az"}, {"белорусский", "be"},{"болгарский", "bg"},{"боснийский", "bs"},{"вьетнамский", "vi"},{"венгерский:", "hu"},
+                {"голландский", "nl"},{"греческий", "el"},{"грузинский", "ka"},{"датский", "da"},{"иврит", "he"},{"индонезийский", "id"},{"итальянский", "it"},{"исландский", "is"},{"испанский", "es"},{"каталанский", "ca"},
+                {"китайский", "zh"},{"корейский", "ko"},{"латышский", "lv"},{"литовский", "lt"},{"малайский", "ms"},{"мальтийский", "mt"},{"македонский", "mk"},{"немецкий", "de"},{"норвежский", "no"},{"польский", "pl"},{"португальский", "pt"},
+                {"румынский", "ro"},{"русский", "ru"},{"сербский", "sr"},{"словацкий", "sk"},{"словенский", "sl"},{"тайский", "th"},{"турецкий", "tr"},{"украинский", "uk"},{"финский", "fi"},{"французский", "fr"},{"хорватский", "hr"},{"чешский", "cs"},
+                {"шведский", "sv"},{"эстонский", "et"},{"японский", "ja"}
+            };
+            string outText = null;
+            foreach (string i in incText.Split(' '))
+            {
+                try
+                {
+                    outText = languages[i];
+                }
+                catch
+                {
+                    // ignored
+                }
+            }
+            return outText;
+        }
+        private static string GetTranslation(string incText, out int code)//Посылаем запрос на яндекс апи и парсим его
+        {
+            string readyTranslation = null;
+            string language = GetLanguage(incText);
+            string text = GetText(incText);
+            string requestTranslation = "https://translate.yandex.net/api/v1.5/tr.json/translate?" +
+                                        "key=trnsl.1.1.20150524T104742Z.9a0451058fe75256.f117d41dfe09dbb900b46cd9a823fef7e97c0d69" +
+                                        "&lang="+ language +
+                                        "&text="+ text +
+                                        "&callback=myCallback" +
+                                        "&options=1";
+            var req =
+                    (HttpWebRequest)
+                        WebRequest.Create(requestTranslation);
+            var resp = (HttpWebResponse)req.GetResponse();
+            var sr = new StreamReader(resp.GetResponseStream(), Encoding.GetEncoding(1251));
+            var content = sr.ReadToEnd();
+            sr.Close();
+            content = content.Substring(10);
+            content = content.Replace('(', ' ');
+            content = content.Replace(')', ' ');
+            content = content.Replace('[', ' ');
+            content = content.Replace(']', ' ');
+            dynamic all = JsonConvert.DeserializeObject(content);
+            readyTranslation = all.text;
+            code = all.code;
+            return readyTranslation;
+        }
+        public static void MainSender(Message message, VkApi _vk)//Метод, посылающий ошибку или перевод
+        {
+            Random random= new Random();
+            int randomNumber;
+            string captcha;
+            int code;
+            string text = GetTranslation(message.Body, out code);
+            randomNumber = random.Next(1000, 1000000);
+            captcha = randomNumber.ToString();
+            if (code == 200)
+            {
+                _vk.Messages.Send(
+                    Convert.ToInt64(message.UserId),
+                    false,
+                    "Это сообщение было отправлено ботом. \n\r" +
+                    DateTime.Now.ToString("HH:mm:ss") + " :: "
+                    + randomNumber + "\n\r" + "Ваш перевод: \n\r" + text,
+                    "",
+                    null,
+                    null,
+                    false,
+                    null,
+                    null,
+                    captcha
+                    );
+            }
+            else
+            {
+                _vk.Messages.Send(
+                    Convert.ToInt64(message.UserId),
+                    false,
+                    "Это сообщение было отправлено ботом. \n\r" +
+                    DateTime.Now.ToString("HH:mm:ss") + " :: "
+                    + randomNumber + "\n\r" + "Не получается перевести, проверьте правильность ввода и попробуйте еще раз.",
+                    "",
+                    null,
+                    null,
+                    false,
+                    null,
+                    null,
+                    captcha
+                    );
+            }
+        }
+         
+    }
     class Interpretator
     {
         private static ReadOnlyCollection<Message> mainList; 
@@ -695,6 +814,12 @@ namespace main
                         _vk.Messages.MarkAsRead(Convert.ToInt64(i.Id));
                     }
                 }
+                else if (i.Body.ToLower().Contains("перевести") && !Convert.ToBoolean(i.ReadState))
+                {
+                    Translator.MainSender(i, _vk);
+                    Console.WriteLine(">> Translation was sent");
+                    _vk.Messages.MarkAsRead(Convert.ToInt64(i.Id));
+                }
                 else if (i.Body.ToLower().Contains("гороскоп") && !Convert.ToBoolean(i.ReadState))
                 {
                     Horoscope.SendHoroscope(i, _vk);
@@ -728,9 +853,9 @@ namespace main
                     _vk.Messages.Send(
                         Convert.ToInt64(i.UserId),
                         false,
-                        "This message was send by Bot. \n\r" +
+                        "Это сообщение отослано ботом. \n\r" +
                         DateTime.Now.ToString("HH:mm:ss") + " :: " +
-                        randomNumber + "\n\r" + "Type \"Помощь\" to get information about Bot",
+                        randomNumber + "\n\r" + "Напишите \"Помощь\" чтобы получить информацию о боте",
                         "",
                         null,
                         null,
@@ -783,7 +908,7 @@ namespace main
             }
             //Создаем отдельный поток для проверки наличия заявок в друзья.
             new Thread(() => AddFriends.main()).Start();
-            _timer = new Timer(1000);
+            _timer = new Timer(2500);
             _timer.Start();
             _timer.Elapsed += OnTimedEvent;
 
