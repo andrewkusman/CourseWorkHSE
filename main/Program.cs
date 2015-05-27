@@ -19,6 +19,8 @@ using Timer = System.Timers.Timer;
 
 namespace main
 {
+    
+
     class Calc
     {
         //Главная функция, которая отправляет решение
@@ -28,29 +30,30 @@ namespace main
             try
             {
                 solution = MainCalc(message.Body).ToString();
+                var rand = new Random();
+                var captcha = rand.Next(10000, 1000000).ToString();
+                var randomNumber = rand.Next(1000, 1000000);
+                _vk.Messages.Send(
+                    Convert.ToInt64(message.UserId),
+                    false,
+                    "This message was send by Bot. \n\r" +
+                    DateTime.Now.ToString("HH:mm:ss") + " :: " +
+                    randomNumber + "\n\r" + "Solution: \n\r" +
+                    solution,
+                    "",
+                    null,
+                    null,
+                    false,
+                    null,
+                    null,
+                    captcha
+                );
             }
             catch
             {
                 solution = "Mistake in incoming expression, please try again";
             }
-            var rand = new Random();
-            var captcha = rand.Next(10000, 1000000).ToString();
-            var randomNumber = rand.Next(1000, 1000000);
-            _vk.Messages.Send(
-                Convert.ToInt64(message.UserId),
-                false,
-                "This message was send by Bot. \n\r" +
-                DateTime.Now.ToString("HH:mm:ss") + " :: " + 
-                randomNumber + "\n\r" + "Solution: \n\r" + 
-                solution,
-                "",
-                null,
-                null,
-                false,
-                null,
-                null,
-                captcha
-            );
+            
         }
         //Получаем приоритет
         static private byte PrioGet(char s)
@@ -206,6 +209,7 @@ namespace main
     {
         public string content = null;
     }
+
     class Anekdot
     {
         //Метод, получающий анекдот с сайта
@@ -244,7 +248,7 @@ namespace main
                     id,
                     false,
                     "Сообщение выслано ботом. \n\r" +
-                    DateTime.Now.ToString("HH:mm:ss") + " :: " + 
+                    DateTime.Now.ToString("HH:mm:ss") + " :: " +
                     randomNumber + "\n\r" +
                     "Текст сообщения: \n\rВозможно вы допустили ошибку в сообщении, но, скорее всего, сервер с анекдотами недоступен. Повторите попытку",
                     "",
@@ -346,7 +350,7 @@ namespace main
         {
             var horoscope = "Нет гороскопв";
             var pattern = "(<div class=\"goroskop\">(.+)</div>)";
-            string horoname = null;
+            string horoname;
             var horoLink = GetHorolink(incStr, out horoname);
             horoName = horoname;
             if (horoLink == null)
@@ -359,7 +363,7 @@ namespace main
                 var req =
                     (HttpWebRequest)
                         WebRequest.Create(horoLink);
-                var resp = (HttpWebResponse) req.GetResponse();
+                var resp = (HttpWebResponse)req.GetResponse();
                 var sr = new StreamReader(resp.GetResponseStream(), Encoding.GetEncoding(1251));
                 var content = sr.ReadToEnd();
                 sr.Close();
@@ -368,7 +372,7 @@ namespace main
                 {
                     horoscope = match.Groups[2].Value;
                 }
-                return horoscope;
+                return horoscope.ToLower().Replace("сегодня", "завтра");
             }
         }
         //Метод, посылающий гороскоп
@@ -381,42 +385,51 @@ namespace main
             string horoName = null;
             var text = GetHoroscope(incStr.Body, out horoName);
             var i = Convert.ToInt64(incStr.UserId);
-            if (text == null)//Если где-то произошла ошибка, то посылаем ее обратно
+            try
             {
-                _vk.Messages.Send(
-                    i,
-                    false,
-                    "Это сообщение отослано ботом. \n\r" + 
-                    DateTime.Now.ToString("HH:mm:ss") + " :: " + 
-                    randomNumber + "\n\r" +
-                    "Текст сообщения: \n\rСкорее всего вы сделали ошибку в сообщениее, пожалуйста, повторите еще раз.",
-                    "",
-                    null,
-                    null,
-                    false,
-                    null,
-                    null,
-                    captcha
-                    );
-                Console.WriteLine(">> Message sent back cuz of mistake in it " + i);
+                if (text == null) //Если где-то произошла ошибка, то посылаем ее обратно
+                {
+
+                    _vk.Messages.Send(
+                        i,
+                        false,
+                        "Это сообщение отослано ботом. \n\r" +
+                        DateTime.Now.ToString("HH:mm:ss") + " :: " +
+                        randomNumber + "\n\r" +
+                        "Текст сообщения: \n\rСкорее всего вы сделали ошибку в сообщениее, пожалуйста, повторите еще раз.",
+                        "",
+                        null,
+                        null,
+                        false,
+                        null,
+                        null,
+                        captcha
+                        );
+                    Console.WriteLine(">> Message sent back cuz of mistake in it " + i);
+                }
+                else
+                {
+                    _vk.Messages.Send(
+                        i,
+                        false,
+                        "Это сообщение отослано ботом. \n\r" +
+                        DateTime.Now.ToString("HH:mm:ss") + " :: " +
+                        randomNumber + "\n\r" + "Текст сообщения: \n\rВаш гороскоп \"" + horoName + "\" " + date + " : " +
+                        text,
+                        "",
+                        null,
+                        null,
+                        false,
+                        null,
+                        null,
+                        captcha
+                        );
+                    Console.WriteLine(">> Id sent to: " + i);
+                }
             }
-            else
+            catch
             {
-                _vk.Messages.Send(
-                    i,
-                    false,
-                    "Это сообщение отослано ботом. \n\r" +
-                    DateTime.Now.ToString("HH:mm:ss") + " :: " +
-                    randomNumber + "\n\r" + "Текст сообщения: \n\rВаш гороскоп \""+ horoName + "\" " + date +" : " + text,
-                    "",
-                    null,
-                    null,
-                    false,
-                    null,
-                    null,
-                    captcha
-                    );
-                Console.WriteLine(">> Id sent to: " + i);
+                //ignored
             }
         }
     }
@@ -434,7 +447,7 @@ namespace main
                 var tmp2 = 0;
                 for (var i = 1; i < text.Length; i++)
                 {
-                    if (text[i - 1] != '\"' || i < 1) 
+                    if (text[i - 1] != '\"' || i < 1)
                         continue;
                     else if (!flag)
                     {
@@ -484,7 +497,7 @@ namespace main
                                 (HttpWebRequest)
                                     WebRequest.Create("http://api.vk.com/method/users.get?user_ids=" + nickname +
                                                       "&v=5.30");
-                            var resp = (HttpWebResponse) req.GetResponse();
+                            var resp = (HttpWebResponse)req.GetResponse();
                             var sr = new StreamReader(resp.GetResponseStream());
                             string content = sr.ReadToEnd();
                             sr.Close();
@@ -512,10 +525,7 @@ namespace main
             string captcha = null;
             var text = SplitStr(messageText.Body);
 
-            //Console.WriteLine(">> " + text);
-            Console.WriteLine(">> " + messageText.Body);
-
-            if (reciepentIdList!= null && reciepentIdList.Count > 0 && reciepentIdList.Count <= 10)
+            if (reciepentIdList != null && reciepentIdList.Count > 0 && reciepentIdList.Count <= 10)
             {
                 foreach (var i in reciepentIdList)
                 {
@@ -559,7 +569,7 @@ namespace main
                     }
                 }
             }
-            else if (reciepentIdList!= null && (reciepentIdList.Count > 10 || reciepentIdList.Count <= 0))//Если не нашли пользователей
+            else if (reciepentIdList != null && (reciepentIdList.Count > 10 || reciepentIdList.Count <= 0))//Если не нашли пользователей
             {                                                                                             //которым надо перелать сообщение
                 randomNumber = random.Next(1000, 1000000);
                 captcha = randomNumber.ToString();
@@ -616,54 +626,68 @@ namespace main
         }
         private static void AddToFriends(VkApi _vk)
         {
-            var friendRequestsId = _vk.Friends.GetRequests(4, null);
-            foreach (var i in friendRequestsId)
+            try
             {
-                _vk.Friends.Add(i);
-                Help.HelpSend(_vk, i);
-                Console.WriteLine(">> Added id: " + i);
+                var friendRequestsId = _vk.Friends.GetRequests();
+                foreach (var i in friendRequestsId)
+                {
+                    _vk.Friends.Add(i);
+                    Help.HelpSend(_vk, i);
+                    Console.WriteLine(">> Added id: " + i);
+                }
+            }
+            catch
+            {
+                //ignored
             }
         }
     }
     class Help
     {
-        
+
         public static void HelpSend(VkApi _vk, long id)//Отсылка помощи
         {
             Random random = new Random();
             int randomNumber = random.Next(1000, 1000000);
             Random rand = new Random();
             string captcha = rand.Next(10000, 1000000).ToString();
-            _vk.Messages.Send(
-                            id,
-                            false,
-                            "Это сообщение отослано ботом. \n\r" +
-                                     DateTime.Now.ToString("HH:mm:ss") + " :: " +
-                                     randomNumber + "\n\r" + "Бот для ВК. v.0.2.3 \n\r" +
-                                     "Доступные функции: \n\r" +
-                                     "1)Гороскоп на сегодня или на завтра. Напишите: Гороскоп на сегодня/завтра \"знак зодиака(без кавычек)\"\n\r" +
-                                     "2)Переслать текст сообщения от имени бота. Напишите: Переслать \"текст сообщения в кавычках\" и ссылку/cсылки на страницы получателей(не больше 10 за 1 раз)\n\r" +
-                                     "3)Переслать анекдот кому-то от имени бота. Напишите: Переслать анекдот и ссылку/cсылки на страницы получателей(не больше 10 за 1 раз)\n\r" + 
-                                     "4)Получение анекдота. Напишите: Анекдот\n\r" +
-                                     "5)Переслать гороскоп. Напишите: Переслать анекдот и ссылку/cсылки на страницы получателей(не больше 10 за 1 раз)\n\r" +
-                                     "6)Посчитать простой пример. Напишите: Посчитать \"2+2(без кавычек)\" (тригонометрические функции пока что не поддерживаются)" +
-                                     "7)Перевести введенный текст на заданный. Напишите: Перевести на \"язык(без кавычек, например, русский)\" \"текст, который требуется перевести(без кавычек)\". Переведено сервисом «Яндекс.Перевод» http://translate.yandex.ru/." + 
-                                     "Сделал Андрей Кусачев. https://vk.com/kusandre",
-                            "",
-                            null,
-                            null,
-                            false,
-                            null,
-                            null,
-                            captcha
-                            );
-            Console.WriteLine(">> Help was send" + id);
+            try
+            {
+                _vk.Messages.Send(
+                    id,
+                    false,
+                    "Это сообщение отослано ботом. \n\r" +
+                    DateTime.Now.ToString("HH:mm:ss") + " :: " +
+                    randomNumber + "\n\r" + "Бот для ВК. v.0.2.3 \n\r" +
+                    "Доступные функции: \n\r" +
+                    "1)Гороскоп на сегодня или на завтра. Напишите: Гороскоп на сегодня/завтра \"знак зодиака(без кавычек)\"\n\r" +
+                    "2)Переслать текст сообщения от имени бота. Напишите: Переслать \"текст сообщения в кавычках\" и ссылку/cсылки на страницы получателей(не больше 10 за 1 раз)\n\r" +
+                    "3)Переслать анекдот кому-то от имени бота. Напишите: Переслать анекдот и ссылку/cсылки на страницы получателей(не больше 10 за 1 раз)\n\r" +
+                    "4)Получение анекдота. Напишите: Анекдот\n\r" +
+                    "5)Переслать гороскоп. Напишите: Переслать анекдот и ссылку/cсылки на страницы получателей(не больше 10 за 1 раз)\n\r" +
+                    "6)Посчитать простой пример. Напишите: Посчитать \"2+2(без кавычек)\" (тригонометрические функции пока что не поддерживаются)\n" +
+                    "7)Перевести введенный текст на заданный. Напишите: Перевести на \"язык(без кавычек, например, русский)\" \"текст, который требуется перевести(без кавычек)\". Переведено сервисом «Яндекс.Перевод» http://translate.yandex.ru/. \n" +
+                    "Сделал Андрей Кусачев. https://vk.com/kusandre",
+                    "",
+                    null,
+                    null,
+                    false,
+                    null,
+                    null,
+                    captcha
+                    );
+                Console.WriteLine(">> Help was send" + id);
+            }
+            catch
+            {
+                //ignored
+            }
         }
     }
     //Класс для перевода текста.
     class Translator
     {
-         
+
         private static string GetText(string incText)
         {
             string outText = ReSender.SplitStr(incText).Replace(" ", "+");
@@ -701,15 +725,15 @@ namespace main
             string text = GetText(incText);
             string requestTranslation = "https://translate.yandex.net/api/v1.5/tr.json/translate?" +
                                         "key=trnsl.1.1.20150524T104742Z.9a0451058fe75256.f117d41dfe09dbb900b46cd9a823fef7e97c0d69" +
-                                        "&lang="+ language +
-                                        "&text="+ text +
+                                        "&lang=" + language +
+                                        "&text=" + text +
                                         "&callback=myCallback" +
                                         "&options=1";
             var req =
                     (HttpWebRequest)
                         WebRequest.Create(requestTranslation);
             var resp = (HttpWebResponse)req.GetResponse();
-            var sr = new StreamReader(resp.GetResponseStream(), Encoding.Default);
+            var sr = new StreamReader(resp.GetResponseStream(), Encoding.UTF8);
             var content = sr.ReadToEnd();
             sr.Close();
             content = content.Substring(10);
@@ -720,12 +744,11 @@ namespace main
             dynamic all = JsonConvert.DeserializeObject(content);
             readyTranslation = all.text;
             code = all.code;
-            Console.WriteLine(">> " + readyTranslation);
             return readyTranslation;
         }
         public static void MainSender(Message message, VkApi _vk)//Метод, посылающий ошибку или перевод
         {
-            Random random= new Random();
+            Random random = new Random();
             int randomNumber;
             string captcha;
             int code;
@@ -767,11 +790,11 @@ namespace main
                     );
             }
         }
-         
+
     }
     class Interpretator
     {
-        private static ReadOnlyCollection<Message> mainList; 
+        private static ReadOnlyCollection<Message> mainList;
         //public static void Interpretate(ReadOnlyCollection<Message> message, VkApi _vk)
         public static void Interpretate(object message, object test)
         {
@@ -783,7 +806,7 @@ namespace main
             {
                 if (i.Body.ToLower().Contains("переслать") && !Convert.ToBoolean(i.ReadState))
                 {
-                    if (i.Body.ToLower().Contains("переслать анекдот"))
+                    if (i.Body.ToLower().Contains("анекдот"))
                     {
                         i.Body += " \"Анекдот от бота) \n\r" + Anekdot.GetAnekdote() + "\"";
                         Console.WriteLine(">> " + i.Body);
@@ -791,7 +814,7 @@ namespace main
                         Console.WriteLine(">> Anekdote was send to another person");
                         _vk.Messages.MarkAsRead(Convert.ToInt64(i.Id));
                     }
-                    else if (i.Body.ToLower().Contains("переслать гороскоп"))
+                    else if (i.Body.ToLower().Contains("гороскоп"))
                     {
                         string horo;
                         string text = Horoscope.GetHoroscope(i.Body, out horo);
@@ -866,13 +889,19 @@ namespace main
     class Program
     {
         private static Timer _timer;
-        private static Timer _timerNew;
         private static VkApi _vk;
         private static void OnTimedEvent(object source, ElapsedEventArgs e)
         {
             var count = 100;
-            var testMessage = _vk.Messages.Get(MessageType.Received, out count);
-            new Thread(() => Interpretator.Interpretate(testMessage, _vk)).Start();
+            try
+            {
+                var testMessage = _vk.Messages.Get(MessageType.Received, out count);
+                new Thread(() => Interpretator.Interpretate(testMessage, _vk)).Start();
+            }
+            catch (Exception y)
+            {
+                Console.WriteLine(">> Error" + y);
+            }
 
         }
 
@@ -880,8 +909,7 @@ namespace main
         {
             const int appid = 4915376;
             const string email = "89263014118";
-            var password = "t511baa927nk";
-            //var password = Console.ReadLine();
+            var password = Console.ReadLine();
             var mess = Settings.Messages;
             var friends = Settings.Friends;
 
@@ -891,7 +919,6 @@ namespace main
             {
                 _vk.Authorize(appid, email, password, mess | friends);
                 Console.WriteLine(_vk.AccessToken);
-                Console.WriteLine();
                 Console.WriteLine("Authorization successfull");
             }
             catch (VkApiAuthorizationException e)
